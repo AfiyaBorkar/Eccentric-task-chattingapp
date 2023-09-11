@@ -6,22 +6,10 @@ const messageRoutes = require("./routes/messages");
 const app = express();
 const socket = require("socket.io");
 require("dotenv").config();
-const Group = require("./models/groupModel")
+const Group = require("./models/groupModel");
 
-
-
-app.use(express.cors())
+app.use(cors()); // Use the CORS middleware
 app.use(express.json());
-
-
-
-// app.use(express.static(path.resolve(__dirname, '../client/build')));
-// app.get('*', (req, res) => {
-//   res.sendFile(path.resolve(__dirname, '../client/build/index.html'));
-// });
-
-
-
 
 mongoose
   .connect(process.env.MONGO_URL, {
@@ -31,11 +19,9 @@ mongoose
   .then(async () => {
     console.log("DB Connection Successful");
 
-    // Check if there are any documents in the Group collection
     const count = await Group.countDocuments();
 
     if (count === 0) {
-      // Create a default collection if no documents exist
       const allUsersGroup = await Group.create({});
       await allUsersGroup.save();
     }
@@ -43,7 +29,6 @@ mongoose
   .catch((err) => {
     console.log(err.message);
   });
-
 
 app.use("/api/auth", authRoutes);
 app.use("/api/messages", messageRoutes);
@@ -53,7 +38,7 @@ const server = app.listen(process.env.PORT || 5000, () =>
 );
 const io = socket(server, {
   cors: {
-    origin: "*",
+    origin: "*", // Allow all origins to access your server
     credentials: true,
   },
 });
@@ -65,35 +50,19 @@ io.on("connection", (socket) => {
     onlineUsers.set(userId, socket.id);
   });
 
-  // socket.on("send-msg", (data) => {
-  //   const sendUserSocket = onlineUsers.get(data.to);
-  //   if (sendUserSocket) {
-  //     socket.to(sendUserSocket).emit("msg-recieve", data.msg);
-  //   }
-  // });
   socket.on("send-msg", (data) => {
-    console.log("🚀 ~ file: index.js:68 ~ socket.on ~ data:", data)
+    console.log("Received message:", data);
 
-   
-
-    console.log(onlineUsers)
-    if(data.type=="group")
-    {
-        // Broadcast the message to all online users
-        onlineUsers.forEach((userSocket) => {
-          socket.to(userSocket).emit("msg-recieve", data);
-        });
-    }
-    else
-    {
+    if (data.type === "group") {
+      // Broadcast the message to all online users
+      onlineUsers.forEach((userSocket) => {
+        socket.to(userSocket).emit("msg-recieve", data);
+      });
+    } else {
       const sendUserSocket = onlineUsers.get(data.to);
       if (sendUserSocket) {
         socket.to(sendUserSocket).emit("msg-recieve", data);
       }
     }
-
   });
-
-  
-
 });
