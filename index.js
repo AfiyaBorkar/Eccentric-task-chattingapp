@@ -10,8 +10,7 @@ const Group = require("./models/groupModel")
 
 
 
-
-app.use(cors());
+app.use(express.cors())
 app.use(express.json());
 
 
@@ -54,7 +53,7 @@ const server = app.listen(process.env.PORT || 5000, () =>
 );
 const io = socket(server, {
   cors: {
-    origin: "https://eccentric-task-chattingapp-afiya.vercel.app",
+    origin: "*",
     credentials: true,
   },
 });
