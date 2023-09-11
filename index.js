@@ -54,7 +54,7 @@ const server = app.listen(process.env.PORT || 5000, () =>
 );
 const io = socket(server, {
   cors: {
-    origin: "*",
+    origin: "https://eccentric-task-chattingapp-afiya.vercel.app",
     credentials: true,
   },
 });
