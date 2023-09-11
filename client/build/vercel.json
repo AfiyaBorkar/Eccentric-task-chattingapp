@@ -1,8 +1,8 @@
 {
     "builds": [
       {
-         "src": "./index.html"  
-        
+         "src": "./index.html",  
+         "use": "@vercel/react"
        }
    ],
    "rewrites": [
